@@ -60,9 +60,7 @@ class Master(Script):
         # create the log, pid, zeppelin dirs
         Directory([params.zeppelin_pid_dir, params.zeppelin_log_dir, params.zeppelin_dir],
                   owner=params.zeppelin_user,
-                  group=params.zeppelin_group,
-                  create_parents=True,
-                  recursive_ownership=True                  
+                  group=params.zeppelin_group
                   )
 
         File(params.zeppelin_log_file,
@@ -222,14 +220,15 @@ class Master(Script):
         import json, urllib2
         encoded_body = json.dumps(body)
         req = urllib2.Request(str(url), encoded_body)
+        req.add_header('Content-Type', 'application/json')
         req.get_method = lambda: 'PUT'
         try:
-            response = urllib2.urlopen(req, encoded_body).read()
-        except urllib2.HTTPError, error:
-            print 'Exception: ' + error.read()
+            response = urllib2.urlopen(req).read()
+        except urllib2.HTTPError as e:
+            print 'Exception: ' + str(e.code)
 
         jsonresp = json.loads(response.decode('utf-8'))
-        print jsonresp['status']
+        print body['group'] + ': ' + jsonresp['status']
 
 
 if __name__ == "__main__":
